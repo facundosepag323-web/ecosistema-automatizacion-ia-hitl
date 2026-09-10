@@ -27,3 +27,8 @@ Las ejecuciones quedan registradas en Airtable, permitiendo monitorear ejecucion
 ## Autor
 
 **Facundo Sepag**
+
+## Enlaces del proyecto
+
+- **Dashboard / Base de Airtable (vista pública):** https://airtable.com/appu5IXStaOteG8Wd/shrOnygWs3e3NfjaO/tbl6NXspeV8XKSoCK/viwSKY8bKluMOROCT
+- **Repositorio GitHub:** contiene el Informe Final en PDF y los Blueprints de los escenarios desarrollados en Make.
