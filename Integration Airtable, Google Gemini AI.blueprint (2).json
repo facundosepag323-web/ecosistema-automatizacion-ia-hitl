@@ -1,0 +1,1376 @@
+{
+    "name": "Integration Airtable, Google Gemini AI",
+    "flow": [
+        {
+            "id": 3,
+            "module": "airtable:TriggerWatchRecords",
+            "version": 3,
+            "parameters": {
+                "base": "appu5IXStaOteG8Wd",
+                "view": "",
+                "table": "tbl6NXspeV8XKSoCK",
+                "config": {
+                    "labelField": "Idea semilla",
+                    "triggerField": "Última modificación"
+                },
+                "formula": "{Estado} = \"Generando\"",
+                "maxRecords": 10,
+                "__IMTCONN__": 10694261,
+                "useColumnId": false
+            },
+            "mapper": {},
+            "metadata": {
+                "designer": {
+                    "x": 0,
+                    "y": 0
+                },
+                "restore": {
+                    "parameters": {
+                        "base": {
+                            "label": "Pipeline de Contenidos – HITL"
+                        },
+                        "view": {
+                            "label": "Empty"
+                        },
+                        "table": {
+                            "label": "Control de Contenidos"
+                        },
+                        "config": {
+                            "nested": {
+                                "labelField": {
+                                    "label": "Idea semilla"
+                                },
+                                "triggerField": {
+                                    "label": "Última modificación"
+                                }
+                            }
+                        },
+                        "__IMTCONN__": {
+                            "data": {
+                                "scoped": "true",
+                                "connection": "airtable3"
+                            },
+                            "label": "Facundo's Airtable OAuth connection (User ID: usrAoEMABYk3Nkp7T)"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "__IMTCONN__",
+                        "type": "account:airtable3,airtable2",
+                        "label": "Connection",
+                        "required": true
+                    },
+                    {
+                        "name": "base",
+                        "type": "select",
+                        "label": "Base",
+                        "required": true
+                    },
+                    {
+                        "name": "useColumnId",
+                        "type": "boolean",
+                        "label": "Use Column ID",
+                        "required": true
+                    },
+                    {
+                        "name": "table",
+                        "type": "select",
+                        "label": "Table",
+                        "required": true
+                    },
+                    {
+                        "name": "config",
+                        "spec": [
+                            {
+                                "name": "triggerField",
+                                "type": "select",
+                                "label": "Trigger field",
+                                "required": true
+                            },
+                            {
+                                "name": "triggerField",
+                                "type": "hidden"
+                            },
+                            {
+                                "name": "labelField",
+                                "type": "select",
+                                "label": "Label field",
+                                "required": true
+                            }
+                        ],
+                        "type": "collection",
+                        "label": "Trigger configuration"
+                    },
+                    {
+                        "name": "maxRecords",
+                        "type": "integer",
+                        "label": "Limit",
+                        "required": true
+                    },
+                    {
+                        "name": "view",
+                        "type": "select",
+                        "label": "View"
+                    },
+                    {
+                        "name": "formula",
+                        "type": "text",
+                        "label": "Formula"
+                    }
+                ],
+                "interface": [
+                    {
+                        "name": "id",
+                        "type": "text",
+                        "label": "ID"
+                    },
+                    {
+                        "name": "createdTime",
+                        "type": "date",
+                        "label": "Created Time"
+                    },
+                    {
+                        "name": "Idea semilla",
+                        "type": "text",
+                        "label": "Idea semilla"
+                    },
+                    {
+                        "name": "Estado",
+                        "type": "text",
+                        "label": "Estado"
+                    },
+                    {
+                        "name": "Contenido Generado",
+                        "type": "text",
+                        "label": "Contenido Generado",
+                        "multiline": true
+                    },
+                    {
+                        "name": "Aprobado",
+                        "type": "boolean",
+                        "label": "Aprobado"
+                    },
+                    {
+                        "name": "Fecha última ejecución",
+                        "time": false,
+                        "type": "date",
+                        "label": "Fecha última ejecución"
+                    },
+                    {
+                        "name": "Contexto RAG",
+                        "type": "text",
+                        "label": "Contexto RAG",
+                        "multiline": true
+                    },
+                    {
+                        "name": "Última modificación",
+                        "type": "date",
+                        "label": "Última modificación"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 4,
+            "module": "gemini-ai:simpleTextPrompt",
+            "version": 1,
+            "parameters": {},
+            "filter": {
+                "name": "Validar Idea Semilla",
+                "conditions": [
+                    [
+                        {
+                            "a": "{{3.`Idea semilla`}}",
+                            "o": "exist"
+                        }
+                    ]
+                ]
+            },
+            "mapper": {
+                "model": "gemini-2.5-flash",
+                "textPrompt": "Actuá como especialista en marketing y creación de contenido para LinkedIn.\n\nTu tarea es redactar un post profesional a partir de la Idea semilla proporcionada.\n\nIMPORTANTE:\n- Utilizá exclusivamente la información incluida en el Contexto RAG.\n- No inventes datos ni agregues información externa.\n- Si el contexto no contiene información suficiente, evitá completar con conocimiento externo.\n- El tono debe ser profesional, claro y humano.\n- El contenido debe estar listo para ser revisado por una persona antes de su publicación.\n- Extensión aproximada: entre 120 y 180 palabras.\n- Incluí un título o frase inicial atractiva y un cierre breve.\n\nIDEA SEMILLA:\n{{3.`Idea semilla`}}\nCONTEXTO RAG:\n{{3.`Contexto RAG`}}\nGenerá únicamente el contenido final del post.                       \nPRUEBA DE ERROR:\nSi el CONTEXTO RAG está vacío o no contiene información suficiente para desarrollar el contenido solicitado, respondé únicamente con la palabra: ERROR_RAG\n\n"
+            },
+            "metadata": {
+                "designer": {
+                    "x": 300,
+                    "y": 0
+                },
+                "restore": {
+                    "expect": {
+                        "model": {
+                            "label": "Gemini 2.5 FlashApplies smart reasoning to fast data tasks while ensuring quick response times"
+                        }
+                    }
+                },
+                "expect": [
+                    {
+                        "name": "model",
+                        "type": "select",
+                        "label": "Model",
+                        "required": true,
+                        "validate": {
+                            "enum": [
+                                "gemini-2.5-flash",
+                                "gemini-3.8-flash",
+                                "gemini-3.7-flash",
+                                "gemini-3.6-flash",
+                                "gemini-3.5-flash",
+                                "gemini-3.1-pro-preview",
+                                "gemini-3-flash-preview",
+                                "gemini-2.5-pro"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "textPrompt",
+                        "type": "text",
+                        "label": "Text prompt",
+                        "required": true
+                    }
+                ]
+            },
+            "onerror": [
+                {
+                    "id": 6,
+                    "module": "airtable:ActionCreateRecord",
+                    "version": 3,
+                    "parameters": {
+                        "__IMTCONN__": 10954955
+                    },
+                    "mapper": {
+                        "base": "appu5IXStaOteG8Wd",
+                        "table": "tblAMlD6Hxf8qHcPu",
+                        "record": {
+                            "fldHcPXRcrlk9l9tU": [
+                                "{{3.id}}"
+                            ],
+                            "fldJFDWqfHm4uQYWD": "{{4.error.message}}",
+                            "fldRIvTLgwaPS75aa": "Error",
+                            "flddPuwiETZXy6mZD": "Generación IA",
+                            "fldjc74W6WiGzkJ4L": "{{4.error}}",
+                            "fldtSPN9f9c506MzQ": "{{now}}"
+                        },
+                        "typecast": false,
+                        "useColumnId": false
+                    },
+                    "metadata": {
+                        "designer": {
+                            "x": 600,
+                            "y": 150
+                        },
+                        "restore": {
+                            "expect": {
+                                "base": {
+                                    "label": "Pipeline de Contenidos – HITL"
+                                },
+                                "table": {
+                                    "label": "Registro de ejecuciones",
+                                    "nested": [
+                                        {
+                                            "name": "record",
+                                            "spec": [
+                                                {
+                                                    "name": "fldjc74W6WiGzkJ4L",
+                                                    "type": "text",
+                                                    "label": "ID Ejecución"
+                                                },
+                                                {
+                                                    "name": "fldHcPXRcrlk9l9tU",
+                                                    "spec": {
+                                                        "label": "Record ID"
+                                                    },
+                                                    "type": "array",
+                                                    "label": "Contenido vinculado"
+                                                },
+                                                {
+                                                    "name": "fldtSPN9f9c506MzQ",
+                                                    "time": true,
+                                                    "type": "date",
+                                                    "label": "Fecha de ejecucion"
+                                                },
+                                                {
+                                                    "mode": "edit",
+                                                    "name": "fldRIvTLgwaPS75aa",
+                                                    "type": "select",
+                                                    "label": "Resultado",
+                                                    "dynamic": true,
+                                                    "options": [
+                                                        {
+                                                            "label": "Exito",
+                                                            "value": "Exito"
+                                                        },
+                                                        {
+                                                            "label": "Error",
+                                                            "value": "Error"
+                                                        }
+                                                    ],
+                                                    "validate": false
+                                                },
+                                                {
+                                                    "name": "fldJFDWqfHm4uQYWD",
+                                                    "type": "text",
+                                                    "label": "Detalle del error",
+                                                    "multiline": true
+                                                },
+                                                {
+                                                    "mode": "edit",
+                                                    "name": "flddPuwiETZXy6mZD",
+                                                    "type": "select",
+                                                    "label": "Etapa",
+                                                    "dynamic": true,
+                                                    "options": [
+                                                        {
+                                                            "label": "Generación IA",
+                                                            "value": "Generación IA"
+                                                        },
+                                                        {
+                                                            "label": "Aprobación HITL",
+                                                            "value": "Aprobación HITL"
+                                                        },
+                                                        {
+                                                            "label": "Envío Gmail",
+                                                            "value": "Envío Gmail"
+                                                        }
+                                                    ],
+                                                    "validate": false
+                                                }
+                                            ],
+                                            "type": "collection",
+                                            "label": "Record"
+                                        }
+                                    ]
+                                },
+                                "record": {
+                                    "nested": {
+                                        "fldHcPXRcrlk9l9tU": {
+                                            "mode": "chose",
+                                            "items": [
+                                                null
+                                            ]
+                                        },
+                                        "fldRIvTLgwaPS75aa": {
+                                            "mode": "edit"
+                                        },
+                                        "flddPuwiETZXy6mZD": {
+                                            "mode": "edit"
+                                        }
+                                    }
+                                },
+                                "typecast": {
+                                    "mode": "chose"
+                                },
+                                "useColumnId": {
+                                    "mode": "chose"
+                                }
+                            },
+                            "parameters": {
+                                "__IMTCONN__": {
+                                    "data": {
+                                        "scoped": "true",
+                                        "connection": "airtable3"
+                                    },
+                                    "label": "Facundo's Airtable OAuth connection (User ID: usrAoEMABYk3Nkp7T)"
+                                }
+                            }
+                        },
+                        "parameters": [
+                            {
+                                "name": "__IMTCONN__",
+                                "type": "account:airtable3,airtable2",
+                                "label": "Connection",
+                                "required": true
+                            }
+                        ],
+                        "expect": [
+                            {
+                                "name": "base",
+                                "type": "select",
+                                "label": "Base",
+                                "required": true
+                            },
+                            {
+                                "name": "typecast",
+                                "type": "boolean",
+                                "label": "Smart links",
+                                "required": true
+                            },
+                            {
+                                "name": "useColumnId",
+                                "type": "boolean",
+                                "label": "Use Column ID",
+                                "required": true
+                            },
+                            {
+                                "name": "table",
+                                "type": "select",
+                                "label": "Table",
+                                "required": true
+                            },
+                            {
+                                "name": "record",
+                                "spec": [
+                                    {
+                                        "name": "fldjc74W6WiGzkJ4L",
+                                        "type": "text",
+                                        "label": "ID Ejecución"
+                                    },
+                                    {
+                                        "name": "fldHcPXRcrlk9l9tU",
+                                        "spec": {
+                                            "name": "value",
+                                            "label": "Record ID"
+                                        },
+                                        "type": "array",
+                                        "label": "Contenido vinculado"
+                                    },
+                                    {
+                                        "name": "fldtSPN9f9c506MzQ",
+                                        "time": true,
+                                        "type": "date",
+                                        "label": "Fecha de ejecucion"
+                                    },
+                                    {
+                                        "mode": "edit",
+                                        "name": "fldRIvTLgwaPS75aa",
+                                        "type": "select",
+                                        "label": "Resultado"
+                                    },
+                                    {
+                                        "name": "fldJFDWqfHm4uQYWD",
+                                        "type": "text",
+                                        "label": "Detalle del error"
+                                    },
+                                    {
+                                        "mode": "edit",
+                                        "name": "flddPuwiETZXy6mZD",
+                                        "type": "select",
+                                        "label": "Etapa"
+                                    }
+                                ],
+                                "type": "collection",
+                                "label": "Record"
+                            }
+                        ],
+                        "interface": [
+                            {
+                                "name": "id",
+                                "type": "text",
+                                "label": "ID"
+                            },
+                            {
+                                "name": "createdTime",
+                                "type": "date",
+                                "label": "Created Time"
+                            },
+                            {
+                                "name": "ID Ejecución",
+                                "type": "text",
+                                "label": "ID Ejecución"
+                            },
+                            {
+                                "name": "Contenido vinculado",
+                                "spec": {
+                                    "label": "Record ID"
+                                },
+                                "type": "array",
+                                "label": "Contenido vinculado"
+                            },
+                            {
+                                "name": "Fecha de ejecucion",
+                                "time": true,
+                                "type": "date",
+                                "label": "Fecha de ejecucion"
+                            },
+                            {
+                                "name": "Resultado",
+                                "type": "text",
+                                "label": "Resultado"
+                            },
+                            {
+                                "name": "Detalle del error",
+                                "type": "text",
+                                "label": "Detalle del error",
+                                "multiline": true
+                            },
+                            {
+                                "name": "Etapa",
+                                "type": "text",
+                                "label": "Etapa"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": 8,
+                    "module": "builtin:Resume",
+                    "version": 1,
+                    "parameters": {},
+                    "mapper": {
+                        "result": "",
+                        "baseModel": "",
+                        "blockReason": "",
+                        "finishReason": "",
+                        "modelVersion": "",
+                        "finishMessage": "",
+                        "usageMetadata": {
+                            "outputTokenCount": "",
+                            "promptTokenCount": ""
+                        }
+                    },
+                    "metadata": {
+                        "designer": {
+                            "x": 870,
+                            "y": 317
+                        },
+                        "restore": {},
+                        "expect": [
+                            {
+                                "name": "result",
+                                "type": "text",
+                                "label": "Result"
+                            },
+                            {
+                                "name": "blockReason",
+                                "type": "text",
+                                "label": "Block reason"
+                            },
+                            {
+                                "name": "finishReason",
+                                "type": "text",
+                                "label": "Finish reason"
+                            },
+                            {
+                                "name": "finishMessage",
+                                "type": "text",
+                                "label": "Finish message"
+                            },
+                            {
+                                "name": "usageMetadata",
+                                "spec": [
+                                    {
+                                        "name": "promptTokenCount",
+                                        "type": "number",
+                                        "label": "Input tokens"
+                                    },
+                                    {
+                                        "name": "outputTokenCount",
+                                        "type": "number",
+                                        "label": "Output tokens"
+                                    }
+                                ],
+                                "type": "collection",
+                                "label": "Usage"
+                            },
+                            {
+                                "name": "baseModel",
+                                "type": "text",
+                                "label": "Model"
+                            },
+                            {
+                                "name": "modelVersion",
+                                "type": "text",
+                                "label": "Model snapshot"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "module": "builtin:BasicRouter",
+            "version": 1,
+            "mapper": null,
+            "metadata": {
+                "designer": {
+                    "x": 600,
+                    "y": -150
+                }
+            },
+            "routes": [
+                {
+                    "flow": [
+                        {
+                            "id": 5,
+                            "module": "airtable:ActionUpdateRecords",
+                            "version": 3,
+                            "parameters": {
+                                "__IMTCONN__": 10694261
+                            },
+                            "filter": {
+                                "name": "Contenido válido - continuar",
+                                "conditions": [
+                                    [
+                                        {
+                                            "a": "{{4.result}}",
+                                            "b": "ERROR_RAG",
+                                            "o": "text:notequal"
+                                        }
+                                    ]
+                                ]
+                            },
+                            "mapper": {
+                                "id": "{{3.id}}",
+                                "base": "appu5IXStaOteG8Wd",
+                                "table": "tbl6NXspeV8XKSoCK",
+                                "record": {
+                                    "fld7CBN4wqjIzAOMv": "En revisión",
+                                    "fldvVjXJundBVwgzm": "{{4.result}}"
+                                },
+                                "typecast": false,
+                                "useColumnId": false
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 900,
+                                    "y": -300
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "base": {
+                                            "label": "Pipeline de Contenidos – HITL"
+                                        },
+                                        "table": {
+                                            "label": "Control de Contenidos"
+                                        },
+                                        "record": {
+                                            "nested": {
+                                                "fld7CBN4wqjIzAOMv": {
+                                                    "mode": "edit"
+                                                },
+                                                "fldDRojIhx1LcSbwn": {
+                                                    "mode": "chose"
+                                                }
+                                            }
+                                        },
+                                        "typecast": {
+                                            "mode": "chose"
+                                        },
+                                        "useColumnId": {
+                                            "mode": "chose"
+                                        }
+                                    },
+                                    "parameters": {
+                                        "__IMTCONN__": {
+                                            "data": {
+                                                "scoped": "true",
+                                                "connection": "airtable3"
+                                            },
+                                            "label": "Facundo's Airtable OAuth connection (User ID: usrAoEMABYk3Nkp7T)"
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "__IMTCONN__",
+                                        "type": "account:airtable3,airtable2",
+                                        "label": "Connection",
+                                        "required": true
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "base",
+                                        "type": "select",
+                                        "label": "Base",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "typecast",
+                                        "type": "boolean",
+                                        "label": "Smart links",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useColumnId",
+                                        "type": "boolean",
+                                        "label": "Use Column ID",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "table",
+                                        "type": "select",
+                                        "label": "Table",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "id",
+                                        "type": "text",
+                                        "label": "Record ID",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "record",
+                                        "spec": [
+                                            {
+                                                "name": "fld5bwzMkuwNo0bR6",
+                                                "type": "text",
+                                                "label": "Idea semilla"
+                                            },
+                                            {
+                                                "mode": "edit",
+                                                "name": "fld7CBN4wqjIzAOMv",
+                                                "type": "select",
+                                                "label": "Estado"
+                                            },
+                                            {
+                                                "name": "fldvVjXJundBVwgzm",
+                                                "type": "text",
+                                                "label": "Contenido Generado"
+                                            },
+                                            {
+                                                "name": "fldDRojIhx1LcSbwn",
+                                                "type": "boolean",
+                                                "label": "Aprobado"
+                                            },
+                                            {
+                                                "name": "fldvXYun8HWLlDF71",
+                                                "time": false,
+                                                "type": "date",
+                                                "label": "Fecha última ejecución"
+                                            },
+                                            {
+                                                "name": "fldxavtDfyfWXeyJ1",
+                                                "type": "text",
+                                                "label": "Contexto RAG"
+                                            }
+                                        ],
+                                        "type": "collection",
+                                        "label": "Record"
+                                    }
+                                ],
+                                "interface": [
+                                    {
+                                        "name": "id",
+                                        "type": "text",
+                                        "label": "ID"
+                                    },
+                                    {
+                                        "name": "createdTime",
+                                        "type": "date",
+                                        "label": "Created Time"
+                                    },
+                                    {
+                                        "name": "Idea semilla",
+                                        "type": "text",
+                                        "label": "Idea semilla"
+                                    },
+                                    {
+                                        "name": "Estado",
+                                        "type": "text",
+                                        "label": "Estado"
+                                    },
+                                    {
+                                        "name": "Contenido Generado",
+                                        "type": "text",
+                                        "label": "Contenido Generado",
+                                        "multiline": true
+                                    },
+                                    {
+                                        "name": "Aprobado",
+                                        "type": "boolean",
+                                        "label": "Aprobado"
+                                    },
+                                    {
+                                        "name": "Fecha última ejecución",
+                                        "time": false,
+                                        "type": "date",
+                                        "label": "Fecha última ejecución"
+                                    },
+                                    {
+                                        "name": "Contexto RAG",
+                                        "type": "text",
+                                        "label": "Contexto RAG",
+                                        "multiline": true
+                                    },
+                                    {
+                                        "name": "Última modificación",
+                                        "type": "date",
+                                        "label": "Última modificación"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 9,
+                            "module": "airtable:ActionCreateRecord",
+                            "version": 3,
+                            "parameters": {
+                                "__IMTCONN__": 10979355
+                            },
+                            "mapper": {
+                                "base": "appu5IXStaOteG8Wd",
+                                "table": "tblAMlD6Hxf8qHcPu",
+                                "record": {
+                                    "fldHcPXRcrlk9l9tU": [
+                                        "{{3.id}}"
+                                    ],
+                                    "fldRIvTLgwaPS75aa": "Exito",
+                                    "flddPuwiETZXy6mZD": "Generación IA",
+                                    "fldjc74W6WiGzkJ4L": "EXITO-{{3.id}}",
+                                    "fldtSPN9f9c506MzQ": "{{now}}"
+                                },
+                                "typecast": false,
+                                "useColumnId": false
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 1200,
+                                    "y": -150
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "base": {
+                                            "label": "Pipeline de Contenidos – HITL"
+                                        },
+                                        "table": {
+                                            "label": "Registro de ejecuciones",
+                                            "nested": [
+                                                {
+                                                    "name": "record",
+                                                    "spec": [
+                                                        {
+                                                            "name": "fldjc74W6WiGzkJ4L",
+                                                            "type": "text",
+                                                            "label": "ID Ejecución"
+                                                        },
+                                                        {
+                                                            "name": "fldHcPXRcrlk9l9tU",
+                                                            "spec": {
+                                                                "label": "Record ID"
+                                                            },
+                                                            "type": "array",
+                                                            "label": "Contenido vinculado"
+                                                        },
+                                                        {
+                                                            "name": "fldtSPN9f9c506MzQ",
+                                                            "time": true,
+                                                            "type": "date",
+                                                            "label": "Fecha de ejecucion"
+                                                        },
+                                                        {
+                                                            "mode": "edit",
+                                                            "name": "fldRIvTLgwaPS75aa",
+                                                            "type": "select",
+                                                            "label": "Resultado",
+                                                            "dynamic": true,
+                                                            "options": [
+                                                                {
+                                                                    "label": "Exito",
+                                                                    "value": "Exito"
+                                                                },
+                                                                {
+                                                                    "label": "Error",
+                                                                    "value": "Error"
+                                                                }
+                                                            ],
+                                                            "validate": false
+                                                        },
+                                                        {
+                                                            "name": "fldJFDWqfHm4uQYWD",
+                                                            "type": "text",
+                                                            "label": "Detalle del error",
+                                                            "multiline": true
+                                                        },
+                                                        {
+                                                            "mode": "edit",
+                                                            "name": "flddPuwiETZXy6mZD",
+                                                            "type": "select",
+                                                            "label": "Etapa",
+                                                            "dynamic": true,
+                                                            "options": [
+                                                                {
+                                                                    "label": "Generación IA",
+                                                                    "value": "Generación IA"
+                                                                },
+                                                                {
+                                                                    "label": "Aprobación HITL",
+                                                                    "value": "Aprobación HITL"
+                                                                },
+                                                                {
+                                                                    "label": "Envío Gmail",
+                                                                    "value": "Envío Gmail"
+                                                                }
+                                                            ],
+                                                            "validate": false
+                                                        }
+                                                    ],
+                                                    "type": "collection",
+                                                    "label": "Record"
+                                                }
+                                            ]
+                                        },
+                                        "record": {
+                                            "nested": {
+                                                "fldHcPXRcrlk9l9tU": {
+                                                    "mode": "chose",
+                                                    "items": [
+                                                        null
+                                                    ]
+                                                },
+                                                "fldRIvTLgwaPS75aa": {
+                                                    "mode": "edit"
+                                                },
+                                                "flddPuwiETZXy6mZD": {
+                                                    "mode": "edit"
+                                                }
+                                            }
+                                        },
+                                        "typecast": {
+                                            "mode": "chose"
+                                        },
+                                        "useColumnId": {
+                                            "mode": "chose"
+                                        }
+                                    },
+                                    "parameters": {
+                                        "__IMTCONN__": {
+                                            "data": {
+                                                "scoped": "true",
+                                                "connection": "airtable3"
+                                            },
+                                            "label": "Facundo's Airtable OAuth connection (User ID: usrAoEMABYk3Nkp7T)"
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "__IMTCONN__",
+                                        "type": "account:airtable3,airtable2",
+                                        "label": "Connection",
+                                        "required": true
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "base",
+                                        "type": "select",
+                                        "label": "Base",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "typecast",
+                                        "type": "boolean",
+                                        "label": "Smart links",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useColumnId",
+                                        "type": "boolean",
+                                        "label": "Use Column ID",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "table",
+                                        "type": "select",
+                                        "label": "Table",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "record",
+                                        "spec": [
+                                            {
+                                                "name": "fldjc74W6WiGzkJ4L",
+                                                "type": "text",
+                                                "label": "ID Ejecución"
+                                            },
+                                            {
+                                                "name": "fldHcPXRcrlk9l9tU",
+                                                "spec": {
+                                                    "name": "value",
+                                                    "label": "Record ID"
+                                                },
+                                                "type": "array",
+                                                "label": "Contenido vinculado"
+                                            },
+                                            {
+                                                "name": "fldtSPN9f9c506MzQ",
+                                                "time": true,
+                                                "type": "date",
+                                                "label": "Fecha de ejecucion"
+                                            },
+                                            {
+                                                "mode": "edit",
+                                                "name": "fldRIvTLgwaPS75aa",
+                                                "type": "select",
+                                                "label": "Resultado"
+                                            },
+                                            {
+                                                "name": "fldJFDWqfHm4uQYWD",
+                                                "type": "text",
+                                                "label": "Detalle del error"
+                                            },
+                                            {
+                                                "mode": "edit",
+                                                "name": "flddPuwiETZXy6mZD",
+                                                "type": "select",
+                                                "label": "Etapa"
+                                            }
+                                        ],
+                                        "type": "collection",
+                                        "label": "Record"
+                                    }
+                                ],
+                                "interface": [
+                                    {
+                                        "name": "id",
+                                        "type": "text",
+                                        "label": "ID"
+                                    },
+                                    {
+                                        "name": "createdTime",
+                                        "type": "date",
+                                        "label": "Created Time"
+                                    },
+                                    {
+                                        "name": "ID Ejecución",
+                                        "type": "text",
+                                        "label": "ID Ejecución"
+                                    },
+                                    {
+                                        "name": "Contenido vinculado",
+                                        "spec": {
+                                            "label": "Record ID"
+                                        },
+                                        "type": "array",
+                                        "label": "Contenido vinculado"
+                                    },
+                                    {
+                                        "name": "Fecha de ejecucion",
+                                        "time": true,
+                                        "type": "date",
+                                        "label": "Fecha de ejecucion"
+                                    },
+                                    {
+                                        "name": "Resultado",
+                                        "type": "text",
+                                        "label": "Resultado"
+                                    },
+                                    {
+                                        "name": "Detalle del error",
+                                        "type": "text",
+                                        "label": "Detalle del error",
+                                        "multiline": true
+                                    },
+                                    {
+                                        "name": "Etapa",
+                                        "type": "text",
+                                        "label": "Etapa"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "flow": [
+                        {
+                            "id": 11,
+                            "module": "airtable:ActionCreateRecord",
+                            "version": 3,
+                            "parameters": {
+                                "__IMTCONN__": 10992069
+                            },
+                            "filter": {
+                                "name": "Error RAG - registrar",
+                                "conditions": [
+                                    [
+                                        {
+                                            "a": "{{4.result}}",
+                                            "b": "ERROR_RAG",
+                                            "o": "text:equal"
+                                        }
+                                    ]
+                                ]
+                            },
+                            "mapper": {
+                                "base": "appu5IXStaOteG8Wd",
+                                "table": "tblAMlD6Hxf8qHcPu",
+                                "record": {
+                                    "fldHcPXRcrlk9l9tU": [
+                                        "{{3.id}}"
+                                    ],
+                                    "fldJFDWqfHm4uQYWD": "Contexto RAG vacío o insuficiente. La IA devolvió ERROR_RAG y el flujo fue detenido antes de continuar.",
+                                    "fldRIvTLgwaPS75aa": "Error",
+                                    "flddPuwiETZXy6mZD": "Generación IA",
+                                    "fldjc74W6WiGzkJ4L": "ERROR_RAG -{{now}}",
+                                    "fldtSPN9f9c506MzQ": "{{now}}"
+                                },
+                                "typecast": false,
+                                "useColumnId": false
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 900,
+                                    "y": 0
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "base": {
+                                            "label": "Pipeline de Contenidos – HITL"
+                                        },
+                                        "table": {
+                                            "label": "Registro de ejecuciones",
+                                            "nested": [
+                                                {
+                                                    "name": "record",
+                                                    "spec": [
+                                                        {
+                                                            "name": "fldjc74W6WiGzkJ4L",
+                                                            "type": "text",
+                                                            "label": "ID Ejecución"
+                                                        },
+                                                        {
+                                                            "name": "fldHcPXRcrlk9l9tU",
+                                                            "spec": {
+                                                                "label": "Record ID"
+                                                            },
+                                                            "type": "array",
+                                                            "label": "Contenido vinculado"
+                                                        },
+                                                        {
+                                                            "name": "fldtSPN9f9c506MzQ",
+                                                            "time": true,
+                                                            "type": "date",
+                                                            "label": "Fecha de ejecucion"
+                                                        },
+                                                        {
+                                                            "mode": "edit",
+                                                            "name": "fldRIvTLgwaPS75aa",
+                                                            "type": "select",
+                                                            "label": "Resultado",
+                                                            "dynamic": true,
+                                                            "options": [
+                                                                {
+                                                                    "label": "Exito",
+                                                                    "value": "Exito"
+                                                                },
+                                                                {
+                                                                    "label": "Error",
+                                                                    "value": "Error"
+                                                                }
+                                                            ],
+                                                            "validate": false
+                                                        },
+                                                        {
+                                                            "name": "fldJFDWqfHm4uQYWD",
+                                                            "type": "text",
+                                                            "label": "Detalle del error",
+                                                            "multiline": true
+                                                        },
+                                                        {
+                                                            "mode": "edit",
+                                                            "name": "flddPuwiETZXy6mZD",
+                                                            "type": "select",
+                                                            "label": "Etapa",
+                                                            "dynamic": true,
+                                                            "options": [
+                                                                {
+                                                                    "label": "Generación IA",
+                                                                    "value": "Generación IA"
+                                                                },
+                                                                {
+                                                                    "label": "Aprobación HITL",
+                                                                    "value": "Aprobación HITL"
+                                                                },
+                                                                {
+                                                                    "label": "Envío Gmail",
+                                                                    "value": "Envío Gmail"
+                                                                }
+                                                            ],
+                                                            "validate": false
+                                                        }
+                                                    ],
+                                                    "type": "collection",
+                                                    "label": "Record"
+                                                }
+                                            ]
+                                        },
+                                        "record": {
+                                            "nested": {
+                                                "fldHcPXRcrlk9l9tU": {
+                                                    "mode": "chose",
+                                                    "items": [
+                                                        null
+                                                    ]
+                                                },
+                                                "fldRIvTLgwaPS75aa": {
+                                                    "mode": "edit"
+                                                },
+                                                "flddPuwiETZXy6mZD": {
+                                                    "mode": "edit"
+                                                }
+                                            }
+                                        },
+                                        "typecast": {
+                                            "mode": "chose"
+                                        },
+                                        "useColumnId": {
+                                            "mode": "chose"
+                                        }
+                                    },
+                                    "parameters": {
+                                        "__IMTCONN__": {
+                                            "data": {
+                                                "scoped": "true",
+                                                "connection": "airtable3"
+                                            },
+                                            "label": "Facundo's Airtable OAuth connection"
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "__IMTCONN__",
+                                        "type": "account:airtable3,airtable2",
+                                        "label": "Connection",
+                                        "required": true
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "base",
+                                        "type": "select",
+                                        "label": "Base",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "typecast",
+                                        "type": "boolean",
+                                        "label": "Smart links",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useColumnId",
+                                        "type": "boolean",
+                                        "label": "Use Column ID",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "table",
+                                        "type": "select",
+                                        "label": "Table",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "record",
+                                        "spec": [
+                                            {
+                                                "name": "fldjc74W6WiGzkJ4L",
+                                                "type": "text",
+                                                "label": "ID Ejecución"
+                                            },
+                                            {
+                                                "name": "fldHcPXRcrlk9l9tU",
+                                                "spec": {
+                                                    "name": "value",
+                                                    "label": "Record ID"
+                                                },
+                                                "type": "array",
+                                                "label": "Contenido vinculado"
+                                            },
+                                            {
+                                                "name": "fldtSPN9f9c506MzQ",
+                                                "time": true,
+                                                "type": "date",
+                                                "label": "Fecha de ejecucion"
+                                            },
+                                            {
+                                                "mode": "edit",
+                                                "name": "fldRIvTLgwaPS75aa",
+                                                "type": "select",
+                                                "label": "Resultado"
+                                            },
+                                            {
+                                                "name": "fldJFDWqfHm4uQYWD",
+                                                "type": "text",
+                                                "label": "Detalle del error"
+                                            },
+                                            {
+                                                "mode": "edit",
+                                                "name": "flddPuwiETZXy6mZD",
+                                                "type": "select",
+                                                "label": "Etapa"
+                                            }
+                                        ],
+                                        "type": "collection",
+                                        "label": "Record"
+                                    }
+                                ],
+                                "interface": [
+                                    {
+                                        "name": "id",
+                                        "type": "text",
+                                        "label": "ID"
+                                    },
+                                    {
+                                        "name": "createdTime",
+                                        "type": "date",
+                                        "label": "Created Time"
+                                    },
+                                    {
+                                        "name": "ID Ejecución",
+                                        "type": "text",
+                                        "label": "ID Ejecución"
+                                    },
+                                    {
+                                        "name": "Contenido vinculado",
+                                        "spec": {
+                                            "label": "Record ID"
+                                        },
+                                        "type": "array",
+                                        "label": "Contenido vinculado"
+                                    },
+                                    {
+                                        "name": "Fecha de ejecucion",
+                                        "time": true,
+                                        "type": "date",
+                                        "label": "Fecha de ejecucion"
+                                    },
+                                    {
+                                        "name": "Resultado",
+                                        "type": "text",
+                                        "label": "Resultado"
+                                    },
+                                    {
+                                        "name": "Detalle del error",
+                                        "type": "text",
+                                        "label": "Detalle del error",
+                                        "multiline": true
+                                    },
+                                    {
+                                        "name": "Etapa",
+                                        "type": "text",
+                                        "label": "Etapa"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "instant": false,
+        "version": 1,
+        "scenario": {
+            "roundtrips": 1,
+            "maxErrors": 3,
+            "autoCommit": true,
+            "autoCommitTriggerLast": true,
+            "sequential": false,
+            "slots": null,
+            "confidential": false,
+            "dataloss": false,
+            "dlq": false,
+            "freshVariables": false
+        },
+        "designer": {
+            "orphans": []
+        },
+        "zone": "us2.make.com",
+        "notes": []
+    }
+}
